@@ -1,15 +1,57 @@
 "use client"
 import Link from "next/link";
-import { useState } from "react";
+import { use, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
+import SockJS from 'sockjs-client';
+import { Stomp } from "@stomp/stompjs";
+import { useNavigate } from "react-router-dom";
+
 
 const Collaboration = () => {
   const [showRoomInput, setShowRoomInput] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('Java');
+  const [roomId , setRoomId] = useState("");
+  const [stompClient, setStompClient] = useState(null);
 
   const enterRoomId = () => {
     setShowRoomInput(true);
   };
+
+
+  const joinRoom = () => {
+    if (!roomId) {
+      alert("Please enter a room ID");
+      return;
+    }
+
+
+    const socket = new SockJS("http://localhost:8080/collab");
+    const client = Stomp.over(socket);
+
+    client.connect({}, () => {
+      console.log("Connected to STOMP");
+      setStompClient(client);
+
+      client.subscribe(`/topic/room/${roomId}`, (message) => {
+        const data = JSON.parse(message.body);
+        if (data.event === "codeUpdate") {
+          setCode(data.code);
+        } else if (data.event === "userJoined" || data.event === "userLeft") {
+          setMessages((prev) => [...prev, data.message]);
+        }
+      });
+
+      client.send(`/app/joinRoom/${roomId}`, {}, JSON.stringify({ username }));
+    }, (error) => {
+      console.error("STOMP error:", error);
+      setMessages((prev) => [...prev, "Connection failed. Please try again."]);
+    });
+
+    if(client.connected){
+      navigate("/Repl");
+    }
+  };
+
 
   const createUUid = () => {
     const roomid = uuidv4();
@@ -52,9 +94,10 @@ const Collaboration = () => {
             <input
               type="text"
               placeholder="Enter Room ID"
+              onChange={(e) => setRoomId(e.target.value)}
               className="bg-white text-black px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 w-64"
             />
-            <button className="bg-blue-500 text-black px-6 py-3 rounded-full font-semibold hover:bg-blue-400 transition-all duration-300">
+            <button onClick={joinRoom} className="bg-blue-500 text-black px-6 py-3 rounded-full font-semibold hover:bg-blue-400 transition-all duration-300">
               Join
             </button>
           </div>

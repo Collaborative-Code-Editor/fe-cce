@@ -1,11 +1,87 @@
 "use client"
-import React, { useState } from 'react';
-import { Editor } from '@monaco-editor/react';
-import '../../css/Repl.css';
 
-const Repl = () => {
+import '../../css/Repl.css';
+import { useEffect, useState, useRef } from "react";
+import SockJS from 'sockjs-client';
+import { Stomp } from "@stomp/stompjs";
+import { Editor } from "@monaco-editor/react";
+
+const Repl = (projectRoomId) => {
   const [roomId, setRoomId] = useState('');
   const [showRoomId, setShowRoomId] = useState(false);
+  const [stompClient, setStompClient] = useState(null);
+  const [username, setUsername] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [code, setCode] = useState("");
+  const messagesEndRef = useRef(null);
+  const [output , setOutput] = useState("");
+  const isRendered = useRef(false)
+
+  // useEffect(() => {
+  //   if(isRendered.current) return;
+  //   isRendered.current = true;
+
+  //   if (!projectRoomId) {
+  //     alert("Please enter a room ID");
+  //     return;
+  //     }
+
+  //   const socket = new SockJS("http://localhost:8080/collab");
+  //   const client = Stomp.over(socket);
+      
+  //   client.connect({}, () => {
+  //     console.log("Connected to STOMP");
+  //     setStompClient(client);
+      
+  //     client.subscribe(`/topic/room/${roomId}`, (message) => {
+  //       const data = JSON.parse(message.body);
+  //       if (data.event === "codeUpdate") {
+  //         setCode(data.code);
+  //       } else if (data.event === "userJoined" || data.event === "userLeft") {
+  //         setMessages((prev) => [...prev, data.message]);
+  //       }
+  //     });
+      
+  //     client.send(`/app/joinRoom/${roomId}`, {}, JSON.stringify({ username }));
+  //     }, (error) => {
+  //       console.error("STOMP error:", error);
+  //       setMessages((prev) => [...prev, "Connection failed. Please try again."]);
+  //     });
+  // }, []);
+
+  const compileCode = async () => {
+    const response = await fetch("http://localhost:8080/api/compile", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        language:"python3",
+        version:"3",
+        code:code
+      }),
+    });
+
+    const result = await response.json();
+    setOutput(result.output || "Error executing code");
+  };
+
+  useEffect(() => {
+
+    return () => {
+      if (stompClient) {
+        stompClient.disconnect(() => console.log("Disconnected from STOMP"));
+      }
+    };
+  }, [stompClient]);
+
+
+  const handleCodeChange = (newValue) => {
+    setCode(newValue); // newValue is the updated code
+
+    if (stompClient && stompClient.connected) {
+      stompClient.send(`/app/codeUpdate/${roomId}`, {}, JSON.stringify({ code: newValue }));
+    }
+  };
+
 
   const handleInviteFriends = () => {
     const storedRoomId = localStorage.getItem('roomid');
@@ -28,7 +104,7 @@ const Repl = () => {
         <button onClick={handleInviteFriends} className="bg-blue-500 text-black px-6 py-3 rounded-full font-semibold hover:bg-blue-400 transition-all duration-300">
           Invite Friends
         </button>
-        <button className="bg-white text-black px-6 py-3 rounded-full font-semibold hover:bg-blue-400 transition-all duration-300">
+        <button onClick={compileCode} className="bg-white text-black px-6 py-3 rounded-full font-semibold hover:bg-blue-400 transition-all duration-300">
           Run code
         </button>
       </div>
@@ -53,8 +129,14 @@ const Repl = () => {
             height='70vh'
             width='100%'
             defaultLanguage="javascript"
+            onChange={handleCodeChange}
           />
+
+          <h2>Output:</h2>
+          <pre>{output}</pre>
         </div>
+
+        
       </div>
 
       <div className="editor_footer mt-4 text-gray-400">Here names of the people joining the room will be showed</div>

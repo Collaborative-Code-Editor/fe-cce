@@ -7,9 +7,16 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
 
   const handleLogin = (e) => {
-    e.preventDefault();
-    console.log({ email, password });
+    
   };
+
+  const handleGoogleLogin = (e) => {
+    window.location.href = 'http://localhost:8081/oauth2/authorization/google';
+  }
+
+  const handleGithubLogin = (e) => {
+    window.location.href = 'http://localhost:8081/oauth2/authorization/github';
+  }
 
   return (
     <section className="min-h-screen flex items-center justify-center bg-black/30">
@@ -47,10 +54,10 @@ const LoginPage = () => {
         </form>
         <p className="mt-4 text-center">or continue with</p>
         <div className="flex justify-center mt-4 gap-4">
-          <button className="bg-white text-black px-4 py-2 rounded-full font-semibold hover:bg-gray-300">
+          <button onClick={handleGoogleLogin} className="bg-white text-black px-4 py-2 rounded-full font-semibold hover:bg-gray-300">
             Google
           </button>
-          <button className="bg-white text-black px-4 py-2 rounded-full font-semibold hover:bg-gray-300">
+          <button onClick={handleGithubLogin} className="bg-white text-black px-4 py-2 rounded-full font-semibold hover:bg-gray-300">
             GitHub
           </button>
         </div>
