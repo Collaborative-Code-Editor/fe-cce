@@ -25,7 +25,7 @@ const Navbar = () => {
             <Link href="/">Home</Link>
           </li>
           <li className="hover:text-blue-400 transition-all duration-300 cursor-pointer">
-            <Link href="/">Collaboration</Link>
+            <Link href="/Collaboration">Collaboration</Link>
           </li>
         </ul>
       </nav>
@@ -47,9 +47,9 @@ const Navbar = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 w-full bg-black/90 backdrop-blur-lg p-4 flex flex-col items-center space-y-4 border-t border-blue-400/30 shadow-lg md:hidden z-50">
+        <div className="absolute top-full left-0 w-full bg-black/90 backdrop-blur-lg p-4 flex flex-col items-center space-y-4 border-t border-blue-400/30 shadow-lg md:hidden">
           <Link href="/" className="text-lg hover:text-blue-400 transition-all duration-300">Home</Link>
-          <Link href="/" className="text-lg hover:text-blue-400 transition-all duration-300">Collaboration</Link>
+          <Link href="/Collaboration" className="text-lg hover:text-blue-400 transition-all duration-300">Collaboration</Link>
           <button className="bg-blue-500 text-black px-4 py-2 rounded-full font-semibold hover:bg-blue-400 transition-all duration-300 w-full">Log In</button>
           <button className="bg-white text-black px-4 py-2 rounded-full font-semibold hover:bg-gray-300 transition-all duration-300 w-full">Sign Up</button>
         </div>

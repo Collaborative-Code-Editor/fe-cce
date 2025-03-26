@@ -1,21 +1,13 @@
 
 .editor_body{
     display: flex;
+    align-items: center;
+    justify-items: center;
 }
 
 .editor{
     display: flex;
     flex-direction: column;
-}
-
-.editor_header{
-    background-color:brown;
-    height: 20px;
-}
-
-.editor_footer{
-    background-color: teal;
-    height: 20px ;
 }
 
 .editor_folder_structure{
