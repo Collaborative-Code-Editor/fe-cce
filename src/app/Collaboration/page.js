@@ -5,13 +5,14 @@ import { v4 as uuidv4 } from 'uuid';
 import SockJS from 'sockjs-client';
 import { Stomp } from "@stomp/stompjs";
 import { useNavigate } from "react-router-dom";
-
+import { useRouter } from 'next/navigation';
 
 const Collaboration = () => {
   const [showRoomInput, setShowRoomInput] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('Java');
   const [roomId , setRoomId] = useState("");
   const [stompClient, setStompClient] = useState(null);
+  const router = useRouter();
 
   const enterRoomId = () => {
     setShowRoomInput(true);
@@ -47,9 +48,9 @@ const Collaboration = () => {
       setMessages((prev) => [...prev, "Connection failed. Please try again."]);
     });
 
-    if(client.connected){
-      navigate("/Repl");
-    }
+    if (client.connected) {
+      router.push(`/Repl`);
+    }    
   };
 
 
